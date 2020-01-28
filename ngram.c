@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 void generate_ngrams(int N);
 void rotate_and_add(char* buff, char newVal, int N);
@@ -11,6 +12,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Usage: %s N (N must be >= 1)\n", argv[0]);
     exit(1);
   }
+
 
   // Convert the N parameter to an integer
   int N = atoi(argv[1]);
@@ -27,22 +29,33 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-void generate_ngrams(int n){
+void generate_ngrams(int N){
   // Dynamically allocated buffer to hold N-sized stream of chars
   char* buff = malloc(sizeof(char) * N+1);
-  char* newVal[2];
+  char* get_success;
+  char newVal[2];
+
   // Get initial input
-  char* get_success = fgets(newVal, 1, stdin);
+  for(int i=0; i<N; i++){
+    get_success = fgets(newVal, 2, stdin);
+    rotate_and_add(buff, newVal[0], N);
+  }
+  // If Nth call to fgets returned NULL, then input string < N so we should exit and print nothing.
+  if(get_success == NULL){
+    return;
+  }
+
   // If input is received, proceed through next iteration of loop
   while (get_success != NULL) {
+    printf("%s\n", buff);
+    get_success = fgets(newVal, 2, stdin);
     rotate_and_add(buff, newVal[0], N);
-    printf("\s", buff);
-    get_success = fgets(newVal, 1, stdin);
   }
 }
 
-void rotate_and_add(char* buff, char newval, int N){
-  for(int i=0; i<N-1; i++){
+void rotate_and_add(char* buff, char newVal, int N){
+  //printf("Rotate %s add %d\n", buff, newVal);
+  for(int i=0; i<N; i++){
     buff[i] = buff[i+1];
   }
   buff[N-1] = newVal;
